@@ -1,4 +1,12 @@
-# Tourism Slogans Analysis - Shiny App
+# Tourism Slogans Analysis V1.0 - Shiny App
+
+# ---------------------------------------------------------------------------
+# Development note: Portions of this application's code were developed with
+# coding assistance from Claude (Anthropic), used under a free-tier account,
+# in July 2025. All analytical design choices, coding scheme definitions,
+# and interpretation of results are the authors' own.
+# ---------------------------------------------------------------------------
+
 # Load required libraries
 library(shiny)
 library(shinydashboard)
@@ -494,8 +502,8 @@ calculate_representative_slogans <- function(data) {
 
 fix_iso_codes <- function(data) {
   # Fix Namibia's NAM issue (was conflicting with NA)
-  namibia_rows <- which(data$country == "Namibia" |
-    grepl("Namibia", data$country, ignore.case = TRUE))
+  namibia_rows <- which(data$destination == "Namibia" |
+    grepl("Namibia", data$destination, ignore.case = TRUE))
   if (length(namibia_rows) > 0) {
     data$iso_alpha3[namibia_rows] <- "NAM"
     cat("✓ Fixed Namibia ISO code:", length(namibia_rows), "rows\n")
@@ -538,7 +546,7 @@ fix_iso_codes <- function(data) {
   )
 
   for (country_name in names(iso_fixes)) {
-    matching_rows <- which(grepl(country_name, data$country, ignore.case = TRUE))
+    matching_rows <- which(grepl(country_name, data$destination, ignore.case = TRUE))
     if (length(matching_rows) > 0) {
       data$iso_alpha3[matching_rows] <- iso_fixes[[country_name]]
       cat("✓ Fixed", country_name, "ISO code:", length(matching_rows), "rows\n")
@@ -610,7 +618,7 @@ ui <- dashboardPage(
               accept = c(".csv", ".xls", ".xlsx")
             ),
             helpText(
-              "CSV should contain columns: country, slogan, cluster, wc, cw, cwr, valence, arousal, dominance, ranking, region, sub_region"
+              "CSV should contain columns: destination, slogan, cluster, wc, cw, cwr, valence, arousal, dominance, ranking, region, sub_region"
             ),
             br(),
             conditionalPanel(
@@ -630,7 +638,7 @@ ui <- dashboardPage(
             HTML(
               "
             <table class='table table-striped'>
-            <thead><tr><th>country</th><th>slogan</th><th>cluster</th><th>wc</th><th>cw</th><th>cwr</th><th>valence</th><th>arousal</th><th>dominance</th><th>ranking</th><th>region</th><th>sub_region</th><th>iso_alpha3</th></tr></thead>
+            <thead><tr><th>destination</th><th>slogan</th><th>cluster</th><th>wc</th><th>cw</th><th>cwr</th><th>valence</th><th>arousal</th><th>dominance</th><th>ranking</th><th>region</th><th>sub_region</th><th>iso_alpha3</th></tr></thead>
             <tbody>
             <tr><td>Thailand</td><td>Amazing Thailand</td><td>1</td><td>2</td><td>2</td><td>0.85</td><td>12.13</td><td>10.28</td><td>5.43</td><td>2</td><td>Asia</td><td>South-Eastern Asia</td><td>THA</td></tr>
             <tr><td>Malaysia</td><td>Malaysia Truly Asia</td><td>3</td><td>3</td><td>3</td><td>0.75</td><td>5.13</td><td>11.24</td><td>9.78</td><td>75</td><td>Asia</td><td>South-Eastern Asia</td><td>MYS</td></tr>
@@ -980,7 +988,7 @@ ui <- dashboardPage(
               style = "margin-top: 10px; padding: 10px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px;",
               tags$p(
                 tags$strong("Note:"),
-                "French overseas territories (French Guiana, Guadeloupe, Martinique, and Réunion) are grouped under France in the map visualization. Users are advised to check the 'Selected Countries' table below for detailed information on individual territories.",
+                "French overseas territories (French Guiana, Guadeloupe, Martinique, and Réunion) are grouped under France in the map visualization. Users are advised to check the 'Selected Destinations' table below for detailed information on individual territories.",
                 style = "margin: 0; font-size: 14px; color: #495057;"
               )
             )
@@ -1010,7 +1018,7 @@ ui <- dashboardPage(
         ),
         fluidRow(
           box(
-            title = "Selected Countries",
+            title = "Selected Destinations",
             status = "info",
             solidHeader = TRUE,
             width = 12,
@@ -1457,7 +1465,7 @@ server <- function(input, output, session) {
         cat("Unmatched ISO codes:", paste(unmatched_iso, collapse = ", "), "\n")
 
         # Show corresponding country names for unmatched ISO codes
-        unmatched_countries <- values$data[values$data$iso_alpha3 %in% unmatched_iso, c("country", "iso_alpha3")]
+        unmatched_countries <- values$data[values$data$iso_alpha3 %in% unmatched_iso, c("destination", "iso_alpha3")]
         cat("Unmatched countries:\n")
         print(unique(unmatched_countries))
       }
@@ -1495,7 +1503,7 @@ server <- function(input, output, session) {
 
         # Updated required columns to include iso_alpha3
         required_cols <- c(
-          "country", "slogan", "cluster", "wc", "cw", "cwr",
+          "destination", "slogan", "cluster", "wc", "cw", "cwr",
           "valence", "arousal", "dominance", "region", "sub_region", "iso_alpha3" # Changed from iso_alpha2
         )
         if (!all(required_cols %in% colnames(values$data))) {
@@ -1527,7 +1535,7 @@ server <- function(input, output, session) {
         # Create corpus
         values$corpus <- corpus(values$data,
           text_field = "slogan",
-          docid_field = "country"
+          docid_field = "destination"
         )
         docvars(values$corpus, "cluster") <- values$data$cluster
         values$processed <- TRUE
@@ -1598,7 +1606,7 @@ server <- function(input, output, session) {
         )
       ),
       colnames = c(
-        "Country",
+        "Destination",
         "Slogan",
         "Cluster",
         "WC",
@@ -1698,7 +1706,7 @@ server <- function(input, output, session) {
 
     cat("=== French Overseas Territories in Your Data ===\n")
     if (nrow(french_overseas_data) > 0) {
-      print(french_overseas_data[, c("country", "slogan", "iso_alpha3", "cluster")])
+      print(french_overseas_data[, c("destination", "slogan", "iso_alpha3", "cluster")])
     } else {
       cat("No French overseas territories found in filtered data\n")
     }
@@ -1740,14 +1748,14 @@ server <- function(input, output, session) {
       iso_matches <- filtered_data[filtered_data$iso_alpha3 == territory_iso, ]
       if (nrow(iso_matches) > 0) {
         territory_data <- iso_matches[1, ]
-        cat("✓ Found", territory_iso, "by ISO match:", territory_data$country, "\n")
+        cat("✓ Found", territory_iso, "by ISO match:", territory_data$destination, "\n")
       } else {
         # Strategy 2: Partial name matching
         for (name_pattern in territory_names) {
-          name_matches <- filtered_data[grepl(name_pattern, filtered_data$country, ignore.case = TRUE), ]
+          name_matches <- filtered_data[grepl(name_pattern, filtered_data$destination, ignore.case = TRUE), ]
           if (nrow(name_matches) > 0) {
             territory_data <- name_matches[1, ]
-            cat("✓ Found", territory_iso, "by name match:", territory_data$country, "matched to", name_pattern, "\n")
+            cat("✓ Found", territory_iso, "by name match:", territory_data$destination, "matched to", name_pattern, "\n")
             break
           }
         }
@@ -1760,7 +1768,7 @@ server <- function(input, output, session) {
 
         if (length(map_indices) > 0) {
           # Update with territory-specific data
-          map_data$country[map_indices] <- territory_data$country
+          map_data$destination[map_indices] <- territory_data$destination
           map_data$slogan[map_indices] <- territory_data$slogan
           map_data$cluster[map_indices] <- territory_data$cluster
           map_data$valence[map_indices] <- territory_data$valence
@@ -1782,7 +1790,7 @@ server <- function(input, output, session) {
       mutate(
         cluster_factor = factor(cluster, levels = c(1, 2, 3)),
         hover_text = ifelse(
-          is.na(slogan) | is.na(country),
+          is.na(slogan) | is.na(destination),
           paste0(
             "<b>", map_unit, "</b><br>",
             "ISO: ", iso_a3, "<br>",
@@ -1802,7 +1810,7 @@ server <- function(input, output, session) {
     # Final check - what do our French territories look like now?
     final_french_check <- map_data %>%
       filter(iso_a3 %in% c("GUF", "GLP", "MTQ", "REU")) %>%
-      select(map_unit, country, slogan, cluster, iso_a3)
+      select(map_unit, destination, slogan, cluster, iso_a3)
 
     cat("=== Final French Territory Status ===\n")
     print(final_french_check)
@@ -1940,7 +1948,7 @@ server <- function(input, output, session) {
       )
   })
 
-  # Selected countries table
+  # Selected destinations table
   output$selected_countries <- DT::renderDataTable({
     filtered_data <- get_filtered_data()
 
@@ -1953,7 +1961,7 @@ server <- function(input, output, session) {
     DT::datatable(
       filtered_data %>%
         select(
-          country,
+          destination,
           slogan,
           cluster,
           region,
@@ -1968,7 +1976,7 @@ server <- function(input, output, session) {
         ),
       options = list(scrollX = TRUE, pageLength = 10),
       colnames = c(
-        "Country",
+        "Destination",
         "Slogan",
         "Cluster",
         "Region",
@@ -1990,7 +1998,7 @@ server <- function(input, output, session) {
       req(values$data, values$world_map)
 
       # Create diagnostics using Alpha-3
-      data_iso <- unique(values$data[, c("country", "iso_alpha3")])
+      data_iso <- unique(values$data[, c("destination", "iso_alpha3")])
       map_iso <- unique(values$world_map[, c("map_unit", "iso_a3")])
 
       # Define French overseas territories (Alpha-3)
@@ -2014,11 +2022,11 @@ server <- function(input, output, session) {
             TRUE ~ "✗ Unmatched"
           )
         ) %>%
-        arrange(desc(iso_alpha3 %in% french_overseas), matched, country) %>%
-        select(status, country, iso_alpha3, map_unit_name) %>%
+        arrange(desc(iso_alpha3 %in% french_overseas), matched, destination) %>%
+        select(status, destination, iso_alpha3, map_unit_name) %>%
         rename(
           "Status" = status,
-          "Your Country Name" = country,
+          "Your Destination Name" = destination,
           "ISO Alpha-3" = iso_alpha3, # Changed column name
           "Map Unit Name" = map_unit_name
         )
@@ -2092,7 +2100,7 @@ server <- function(input, output, session) {
       mutate(
         cluster_factor = as.factor(cluster),
         hover_text = paste0(
-          "<b>", country, "</b><br>",
+          "<b>", destination, "</b><br>",
           "Slogan: ", slogan, "<br>",
           "Cluster: ", cluster, "<br>",
           "Valence: ", round(valence, 2), "<br>",
@@ -2128,7 +2136,7 @@ server <- function(input, output, session) {
         ) %>%
         mutate(
           medoid_text = paste0(
-            "<b>MEDOID - ", country, "</b><br>",
+            "<b>MEDOID - ", destination, "</b><br>",
             "Representative Slogan: ", slogan, "<br>",
             "Cluster: ", cluster, "<br>",
             "Valence: ", round(valence, 2), "<br>",
@@ -2196,7 +2204,7 @@ server <- function(input, output, session) {
 
         # Create proper hover text
         medoid_hover_text <- paste0(
-          "<b>MEDOID - ", medoid_data$country, "</b><br>",
+          "<b>MEDOID - ", medoid_data$destination, "</b><br>",
           "Representative Slogan: ", medoid_data$slogan, "<br>",
           "Cluster: ", cluster_num, "<br>",
           "Valence: ", round(medoid_data$valence, 2), "<br>",
@@ -2221,7 +2229,7 @@ server <- function(input, output, session) {
           text = medoid_hover_text,
           hoverinfo = "text",
           hovertemplate = paste0(
-            "<b>MEDOID - ", medoid_data$country, "</b><br>",
+            "<b>MEDOID - ", medoid_data$destination, "</b><br>",
             "Representative Slogan: ", medoid_data$slogan, "<br>",
             "Cluster: ", cluster_num, "<br>",
             "Valence: %{x:.2f}<br>",
@@ -2279,7 +2287,7 @@ server <- function(input, output, session) {
         # Use the SAME hover text format as the 3D plot
         hover_text = paste0(
           "<b>",
-          country,
+          destination,
           "</b><br>",
           "Slogan: ",
           slogan,
@@ -2964,8 +2972,8 @@ server <- function(input, output, session) {
 
     filtered_data <- thematic_data %>%
       filter(!!selected_col == 1) %>%
-      select(country, slogan, cluster) %>%
-      arrange(cluster, country)
+      select(destination, slogan, cluster) %>%
+      arrange(cluster, destination)
 
     return(filtered_data)
   })
@@ -2981,8 +2989,8 @@ server <- function(input, output, session) {
 
     filtered_data <- linguistic_data %>%
       filter(!!selected_col == 1) %>%
-      select(country, slogan, cluster) %>%
-      arrange(cluster, country)
+      select(destination, slogan, cluster) %>%
+      arrange(cluster, destination)
 
     return(filtered_data)
   })
@@ -3214,7 +3222,7 @@ server <- function(input, output, session) {
       linguistic_data <- get_linguistic_data() %>%
         select(
           cluster,
-          country,
+          destination,
           slogan,
           has_imperative,
           has_interrogative,
@@ -3233,7 +3241,7 @@ server <- function(input, output, session) {
         ) %>%
         rename(
           Cluster = cluster,
-          Country = country,
+          Destination = destination,
           Slogan = slogan,
           Imperative = has_imperative,
           Interrogative = has_interrogative,
@@ -3403,7 +3411,7 @@ server <- function(input, output, session) {
         ) %>%
         select(
           cluster,
-          country,
+          destination,
           slogan,
           nature,
           culture,
@@ -3425,7 +3433,7 @@ server <- function(input, output, session) {
         ) %>%
         rename(
           Cluster = cluster,
-          Country = country,
+          Destination = destination,
           Slogan = slogan,
           Nature = nature,
           Culture = culture,
@@ -3565,7 +3573,7 @@ server <- function(input, output, session) {
 
         paste(
           "Analysis Summary:\n",
-          "- Total countries analyzed:", nrow(values$data), "\n",
+          "- Total destinations analyzed:", nrow(values$data), "\n",
           "- Number of clusters:", length(unique(values$data$cluster)), "\n",
           "- Avg total words:", sprintf("%.2f", mean(values$data$wc, na.rm = TRUE)), "\n",
           "- Avg content words:", sprintf("%.2f", mean(values$data$cw, na.rm = TRUE)), "\n",
