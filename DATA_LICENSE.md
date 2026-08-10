@@ -33,7 +33,7 @@ This license applies to the authors' **compiled dataset and derived analytical
 variables** (e.g., `cluster`, `wc`, `cw`, `cwr`, `valence`, `arousal`,
 `dominance`, `ranking`), which represent original research work.
 
-The `slogan` and `country` fields were compiled from publicly available
+The `slogan` and `destination` fields were compiled from publicly available
 national/destination tourism marketing campaigns for research purposes. The
 tourism slogans themselves are short promotional phrases that remain the
 property of their respective national or destination tourism boards; this
