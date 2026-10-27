@@ -86,7 +86,7 @@ install.packages(c(
 If you use this code or data, please cite:
 
 ```
-Steve Pan, Ping-Ho Ting, Seongseop (Sam) Kim] (2006). Affective Qualities of Tourism Slogan: An AI-Assisted Linguistic Investigation. Tourism Culture & Communication. DOI: 10.3727/194341426X17854445383923.
+Steve Pan, Ping-Ho Ting, Seongseop (Sam) Kim] (2006). Affective Qualities of Tourism Slogan: An AI-Assisted Linguistic Investigation. Tourism Culture & Communication. DOI: https://doi.org/10.3727/194341426X17854445383923.
 ```
 
 ## License
